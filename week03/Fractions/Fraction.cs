@@ -9,9 +9,9 @@ public class Fraction
         _bottom = 1;
     }
 
-    public Fraction(int digit)
+    public Fraction(int tdigit)
     {
-        _top = digit;
+        _top = tdigit;
         _bottom = 1;
     }
 
@@ -29,8 +29,7 @@ public class Fraction
 
     public double GetDecimalValue()
     {
-        return (double)_top / (double)_bottom;
+        double dec = (double)_top / (double)_bottom;
+        return dec;
     }
-
 }
-
