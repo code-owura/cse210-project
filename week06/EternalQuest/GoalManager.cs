@@ -1,31 +1,37 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
 
 public class GoalManager
 {
     private List<Goal> _goals;
     private int _score;
+    private int _level;
+    private List<string> _earnedBadges;
 
     public GoalManager()
     {
         _goals = new List<Goal>();
         _score = 0;
+        _level = 1;
+        _earnedBadges = new List<string>();
     }
 
     public void Start()
     {
         string choice = "";
-        while (choice != "6")
+        while (choice != "7")
         {
             DisplayPlayerInfo();
+
+            Console.ForegroundColor = ConsoleColor.Cyan;
             Console.WriteLine("Menu Options:");
+            Console.ResetColor();
             Console.WriteLine("  1. Create New Goal");
             Console.WriteLine("  2. List Goals");
             Console.WriteLine("  3. Save Goals");
             Console.WriteLine("  4. Load Goals");
             Console.WriteLine("  5. Record Event");
-            Console.WriteLine("  6. Quit");
+            Console.WriteLine("  6. View Statistics");
+            Console.WriteLine("  7. Quit");
             Console.Write("Select a choice from the menu: ");
             choice = Console.ReadLine();
 
@@ -51,18 +57,60 @@ public class GoalManager
             }
             else if (choice == "6")
             {
+                DisplayStatistics();
+            }
+            else if (choice == "7")
+            {
+                Console.ForegroundColor = ConsoleColor.Cyan;
                 Console.WriteLine("Thank you for using the Eternal Quest Program!");
+                Console.WriteLine("Keep working on your goals! 🌟");
+                Console.ResetColor();
             }
             else
             {
+                Console.ForegroundColor = ConsoleColor.Red;
                 Console.WriteLine("Invalid choice. Please try again.");
+                Console.ResetColor();
             }
         }
     }
 
     public void DisplayPlayerInfo()
     {
-        Console.WriteLine($"\nYou have {_score} points.\n");
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.WriteLine($"\n⭐ Level: {_level} | 🏆 Score: {_score} points");
+        if (_earnedBadges.Count > 0)
+        {
+            Console.WriteLine($"🎖️  Badges: {string.Join(", ", _earnedBadges)}");
+        }
+        Console.WriteLine();
+        Console.ResetColor();
+    }
+
+    public void DisplayStatistics()
+    {
+        Console.ForegroundColor = ConsoleColor.Cyan;
+        Console.WriteLine("\n╔══════════════════════════════════════╗");
+        Console.WriteLine("║       📊 YOUR STATISTICS 📊         ║");
+        Console.WriteLine("╚══════════════════════════════════════╝");
+        Console.ResetColor();
+
+        Console.WriteLine($"📝 Total Goals: {_goals.Count}");
+        Console.WriteLine($"✅ Completed: {_goals.Count(g => g.IsComplete())}");
+        Console.WriteLine($"⏳ In Progress: {_goals.Count(g => !g.IsComplete())}");
+        Console.WriteLine($"🏆 Total Points: {_score}");
+        Console.WriteLine($"⭐ Current Level: {_level}");
+        Console.WriteLine($"🎖️  Badges Earned: {_earnedBadges.Count}");
+
+        if (_earnedBadges.Count > 0)
+        {
+            Console.WriteLine("\n🎖️  Your Badges:");
+            foreach (string badge in _earnedBadges)
+            {
+                Console.WriteLine($"   ✨ {badge}");
+            }
+        }
+        Console.WriteLine();
     }
 
     public void ListGoalNames()
@@ -76,7 +124,9 @@ public class GoalManager
 
     public void ListGoalDetails()
     {
+        Console.ForegroundColor = ConsoleColor.Yellow;
         Console.WriteLine("The goals are:");
+        Console.ResetColor();
         for (int i = 0; i < _goals.Count; i++)
         {
             Console.WriteLine($"{i + 1}. {_goals[i].GetDetailsString()}");
@@ -124,7 +174,9 @@ public class GoalManager
         }
         else
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Invalid goal type.");
+            Console.ResetColor();
         }
     }
 
@@ -132,7 +184,9 @@ public class GoalManager
     {
         if (_goals.Count == 0)
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("There are no goals to record. Please create a goal first.");
+            Console.ResetColor();
             return;
         }
 
@@ -146,7 +200,9 @@ public class GoalManager
 
             if (selectedGoal is SimpleGoal && selectedGoal.IsComplete())
             {
+                Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine("This goal has already been completed!");
+                Console.ResetColor();
                 return;
             }
 
@@ -154,19 +210,73 @@ public class GoalManager
             int earnedPoints = int.Parse(selectedGoal.GetPoints());
             _score += earnedPoints;
 
-            Console.WriteLine($"Congratulations! You have earned {earnedPoints} points!");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine($"🎉 Congratulations! You earned {earnedPoints} points!");
+            Console.ResetColor();
+
+            try { Console.Beep(600, 200); } catch { }
 
             if (selectedGoal is ChecklistGoal checklist && checklist.IsComplete())
             {
                 _score += checklist.GetBonus();
-                Console.WriteLine($"BONUS! You have earned an additional {checklist.GetBonus()} points!");
+                Console.ForegroundColor = ConsoleColor.Yellow;
+                Console.WriteLine($"🏆 BONUS! You earned an additional {checklist.GetBonus()} points!");
+                Console.ResetColor();
+                try { Console.Beep(800, 300); } catch { }
             }
 
             Console.WriteLine($"You now have {_score} points.");
+
+            CheckLevelUp();
+            CheckAchievements();
         }
         else
         {
+            Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Invalid goal number.");
+            Console.ResetColor();
+        }
+    }
+
+    private void CheckLevelUp()
+    {
+        int newLevel = (_score / 1000) + 1;
+        if (newLevel > _level)
+        {
+            _level = newLevel;
+            Console.ForegroundColor = ConsoleColor.Magenta;
+            Console.WriteLine("\n╔══════════════════════════════════════╗");
+            Console.WriteLine($"║  🎉 LEVEL UP! You are now Level {_level}!  ║");
+            Console.WriteLine("╚══════════════════════════════════════╝\n");
+            Console.ResetColor();
+
+            try
+            {
+                Console.Beep(523, 100);
+                Console.Beep(659, 100);
+                Console.Beep(784, 200);
+            }
+            catch { }
+        }
+    }
+
+    private void CheckAchievements()
+    {
+        CheckBadge(100, "🥉 Beginner");
+        CheckBadge(500, "🥈 Dedicated");
+        CheckBadge(1000, "🥇 Champion");
+        CheckBadge(5000, "👑 Legend");
+    }
+
+    private void CheckBadge(int scoreRequired, string badgeName)
+    {
+        if (_score >= scoreRequired && !_earnedBadges.Contains(badgeName))
+        {
+            _earnedBadges.Add(badgeName);
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine($"\n🏆 ACHIEVEMENT UNLOCKED: {badgeName}!");
+            Console.ResetColor();
+            try { Console.Beep(1000, 200); } catch { }
         }
     }
 
@@ -178,13 +288,17 @@ public class GoalManager
         using (StreamWriter outputFile = new StreamWriter(filename))
         {
             outputFile.WriteLine(_score);
+            outputFile.WriteLine(_level);
+            outputFile.WriteLine(string.Join(",", _earnedBadges));
             foreach (Goal goal in _goals)
             {
                 outputFile.WriteLine(goal.GetStringRepresentation());
             }
         }
 
-        Console.WriteLine("Goals saved successfully!");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("✅ Goals saved successfully!");
+        Console.ResetColor();
     }
 
     public void LoadGoals()
@@ -194,16 +308,25 @@ public class GoalManager
 
         if (!File.Exists(filename))
         {
-            Console.WriteLine("File not found!");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("❌ File not found!");
+            Console.ResetColor();
             return;
         }
 
         _goals.Clear();
+        _earnedBadges.Clear();
         string[] lines = File.ReadAllLines(filename);
 
         _score = int.Parse(lines[0]);
+        _level = int.Parse(lines[1]);
 
-        for (int i = 1; i < lines.Length; i++)
+        if (!string.IsNullOrEmpty(lines[2]))
+        {
+            _earnedBadges = lines[2].Split(",").ToList();
+        }
+
+        for (int i = 3; i < lines.Length; i++)
         {
             string line = lines[i];
             string[] parts = line.Split(":");
@@ -231,6 +354,8 @@ public class GoalManager
             }
         }
 
-        Console.WriteLine("Goals loaded successfully!");
+        Console.ForegroundColor = ConsoleColor.Green;
+        Console.WriteLine("✅ Goals loaded successfully!");
+        Console.ResetColor();
     }
 }

@@ -35,7 +35,11 @@ public class ChecklistGoal : Goal
     public override string GetDetailsString()
     {
         string status = IsComplete() ? "[X]" : "[ ]";
-        return $"{status} {GetShortName()} ({GetDescription()}) -- Currently completed: {_amountCompleted}/{_target}";
+        int percent = (int)((double)_amountCompleted / _target * 100);
+        int filledBars = percent / 10;
+        if (filledBars > 10) filledBars = 10;
+        string progressBar = "[" + new string('█', filledBars) + new string('░', 10 - filledBars) + "]";
+        return $"{status} {GetShortName()} ({GetDescription()}) {progressBar} {percent}% ({_amountCompleted}/{_target})";
     }
 
     public override string GetStringRepresentation()
